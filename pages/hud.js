@@ -160,8 +160,20 @@ const handlers = {
     countElement.textContent = showMatchText ? countText : "";
   },
 
+  // Navigator.clipboard is only available in secure contexts.
+  // Give a little warning when copying fails on HTTP only site. See #4572
+  isClipboardAvailable() {
+    if (!navigator.clipboard) {
+      UIComponentServer.postMessage( { name: "clipboardUnavailableError" });
+      return false;
+    }
+    return true;
+  },
+
   copyToClipboard(message) {
     Utils.setTimeout(TIME_TO_WAIT_FOR_IPC_MESSAGES, async function () {
+      if (!handlers.isClipboardAvailable()) return;
+
       const focusedElement = document.activeElement;
       // In Chrome, if we do not focus the current window before invoking navigator.clipboard APIs,
       // the error "DOMException: Document is not focused." is thrown.
@@ -179,6 +191,8 @@ const handlers = {
 
   pasteFromClipboard() {
     Utils.setTimeout(TIME_TO_WAIT_FOR_IPC_MESSAGES, async function () {
+      if (!handlers.isClipboardAvailable()) return;
+
       const focusedElement = document.activeElement;
       // In Chrome, if we do not focus the current window before invoking navigator.clipboard APIs,
       // the error "DOMException: Document is not focused." is thrown.

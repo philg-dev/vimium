@@ -183,6 +183,17 @@ const HUD = {
     });
   },
 
+  // Clipboard actions are only available in secure contexts.
+  // In Chromium based browsers this can be allowed via Permissions API's
+  // clipboard-read and clipboard-write permissions.
+  // Give a little warning when copying fails on HTTP only site. See #4572
+  clipboardUnavailableError() {
+    DomUtils.documentComplete(async () => {
+      await this.init();
+      this.show("Clipboard actions are unavailable on HTTP-only sites in your browser.", 2000)
+    });
+  },
+
   pasteResponse({ data }) {
     // Hide the HUD frame again.
     this.hudUI.toggleIframeElementClasses("vimiumUIComponentVisible", "vimiumUIComponentHidden");
